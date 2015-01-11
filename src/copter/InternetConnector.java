@@ -11,8 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -23,9 +21,10 @@ public class InternetConnector implements Runnable {
     private static InternetConnector instance = null;
     private Thread thread = null;
     private Process process = null;
+    private static Logger logger = null;
 
     private InternetConnector() {
-
+        logger = Logger.getInstance();
     }
 
     public String connectBySakis3g() {
@@ -45,14 +44,14 @@ public class InternetConnector implements Runnable {
                 try {
                     Thread.sleep(20000);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                    logger.log(ex.getMessage());
                 }
                 return "connecting...";
             } else {
                 return "connection is already lunched " + internetConnectProcessCommandName + " PID:" + pid;
             }
         } catch (IOException ex) {
-            Logger.getLogger(CameraControl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(ex.getMessage());
             return "connection error: " + ex.getMessage();
         }
     }
@@ -108,7 +107,7 @@ public class InternetConnector implements Runnable {
                 return "there is no connection prcess to stop!";
             }
         } catch (IOException ex) {
-            Logger.getLogger(CameraControl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(ex.getMessage());
             return "connection error: " + ex.getMessage();
         }
     }
@@ -131,7 +130,7 @@ public class InternetConnector implements Runnable {
             process = Runtime.getRuntime().exec(cmd);
             process.waitFor();
         } catch (Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(ex.getMessage());
         }
     }
 }

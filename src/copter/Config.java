@@ -7,7 +7,6 @@ package copter;
 
 import copter.interfaces.LastError;
 import java.io.File;
-import java.net.URL;
 import org.ini4j.Wini;
 
 /**
@@ -52,11 +51,11 @@ public class Config implements LastError {
     private boolean loadIniSettings() {
         String jarDir = this.getJarDir();
         try {
-            ini = new Wini(new File(jarDir+"/config.ini"));
+            ini = new Wini(new File(jarDir + "/config.ini"));
         } catch (Exception ex) {
             lastError = ex.getMessage();
             return false;
-        }      
+        }
         return true;
     }
 

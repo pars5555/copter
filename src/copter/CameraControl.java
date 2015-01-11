@@ -9,8 +9,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -25,14 +23,16 @@ public class CameraControl implements Runnable {
     private int height;
     private int fps;
     private final Config conf;
+    private final Logger logger;
 
     private CameraControl() {
-            this.conf = Config.getInstance();
+        this.conf = Config.getInstance();
+        this.logger = Logger.getInstance();
     }
 
     public String startStreaming(int width, int height, int fps) {
         try {
-            Process p = Runtime.getRuntime().exec("pidof "+conf.getString("camera", "process_command_name"));
+            Process p = Runtime.getRuntime().exec("pidof " + conf.getString("camera", "process_command_name"));
             InputStream inputStream = p.getInputStream();
             InputStreamReader isr = new InputStreamReader(inputStream);
             BufferedReader br = new BufferedReader(isr);
@@ -41,6 +41,9 @@ public class CameraControl implements Runnable {
                 this.width = width;
                 this.height = height;
                 this.fps = fps;
+                if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
+                    thread.interrupt();
+                }
                 thread = new Thread(this);
                 thread.start();
                 return "camera streaming started";
@@ -48,8 +51,9 @@ public class CameraControl implements Runnable {
                 return "camera streaming already stared Process ID: " + pid;
             }
         } catch (IOException ex) {
-            Logger.getLogger(CameraControl.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(ex.getMessage());
             return "camera streaming start error: " + ex.getMessage();
+            
         }
 
     }
@@ -59,11 +63,11 @@ public class CameraControl implements Runnable {
             if (process != null) {
                 process.destroy();
             }
-            if (thread.isAlive() && !thread.isInterrupted()) {
+            if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
                 thread.interrupt();
             }
 
-            Process p = Runtime.getRuntime().exec("pidof "+conf.getString("camera", "process_command_name"));
+            Process p = Runtime.getRuntime().exec("pidof " + conf.getString("camera", "process_command_name"));
             InputStream inputStream = p.getInputStream();
             InputStreamReader isr = new InputStreamReader(inputStream);
             BufferedReader br = new BufferedReader(isr);
@@ -76,7 +80,7 @@ public class CameraControl implements Runnable {
                 return "there is no camera streaming prcess to stop!";
             }
         } catch (IOException ex) {
-            Logger.getLogger(CameraControl.class.getName()).log(Level.SEVERE, null, ex);
+           logger.log(ex.getMessage());
             return "camera streaming stop error: " + ex.getMessage();
         }
 
@@ -91,17 +95,39 @@ public class CameraControl implements Runnable {
 
     @Override
     public void run() {
+        //run_command_as_another_user
+        String cameraStreamCommand = null;
+        try {
+            Process p = Runtime.getRuntime().exec(conf.getString("main", "get_current_user_name_command"));
+            InputStream inputStream = p.getInputStream();
+            InputStreamReader isr = new InputStreamReader(inputStream);
+            BufferedReader br = new BufferedReader(isr);
+            String userName = br.readLine();
+            String camStartComand = String.format(conf.getString("camera", "command"), this.width, this.height, this.fps);
+            if (userName.equalsIgnoreCase("root")) {
+                String runAsAnotherUser = conf.getString("main", "run_command_as_another_user");
+                String camera_running_user_name = conf.getString("camera", "user_name");
+                cameraStreamCommand = String.format(runAsAnotherUser, camStartComand, camera_running_user_name);
+            } else {
+                cameraStreamCommand = camStartComand;
+            }
+        } catch (IOException ex) {
+            logger.log(ex.getMessage());
+           
+        }
+
+        if (conf.getInt("main", "dev_mode") == 1) {
+            logger.log("Camera Control Unit: " + cameraStreamCommand);
+        }
         try {
             String[] cmd = {
                 "/bin/sh",
                 "-c",
-                String.format(conf.getString("camera", "command"), this.width, this.height, this.fps)
-            };
+                cameraStreamCommand};
             process = Runtime.getRuntime().exec(cmd);
             process.waitFor();
         } catch (Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(ex.getMessage());
         }
     }
 }
-

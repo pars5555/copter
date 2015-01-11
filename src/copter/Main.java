@@ -13,13 +13,11 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class Main {
-
+ private static Logger logger = null;
     public static String getIpAddress() {
         String hostAddress = null;
         try {
@@ -36,7 +34,7 @@ public class Main {
                 break;
             }
         } catch (Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(ex.getMessage());
         }
         return hostAddress;
     }
@@ -72,9 +70,9 @@ public class Main {
 
             int responseCode = con.getResponseCode();
             if (Config.getInstance().getInt("main", "dev_mode") == 1) {
-                System.out.println("\nSending 'POST' request to URL : " + url);
-                System.out.println("Post parameters : " + urlParameters);
-                System.out.println("Response Code : " + responseCode);
+                logger.log("\nSending 'POST' request to URL : " + url);
+                logger.log("Post parameters : " + urlParameters);
+                logger.log("Response Code : " + responseCode);
             }
 
             BufferedReader in = new BufferedReader(
@@ -105,8 +103,11 @@ public class Main {
             return "No raspberry ip address!";
         }
     }
+   
 
     public static void main(String[] args) {
+        logger = Logger.getInstance();
+        logger.log( "started");
         /*connecting to the internet*/
         //InternetConnector.getInstance().connectBySakis3g();
         Integer cycleNumber = 1;
@@ -114,15 +115,15 @@ public class Main {
             try {
                 Thread.sleep(3000);
                 if (Config.getInstance().getInt("main", "dev_mode") == 1) {
-                    System.out.println("Checking connection to the server..." + cycleNumber.toString());
+                    logger.log("Checking connection to the server..." + cycleNumber.toString());
                 }
             } catch (InterruptedException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(ex.getMessage());
             }
             cycleNumber++;
             if (cycleNumber >= Config.getInstance().getInt("main", "initial_internet_checking_cycle_count")) {
                 if (Config.getInstance().getInt("main", "dev_mode") == 1) {
-                    System.out.println("Error: could not connect to the internet.");
+                    logger.log("Error: could not connect to the internet.");
                 }
                 exitSystem();
             }
@@ -133,7 +134,8 @@ public class Main {
             WebSocketServerFactory wf = new WebSocketServerFactory(port);
             wf.start();
         } else {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, serverResponse);
+            logger.log( serverResponse);
+
             exitSystem();
         }
 
@@ -141,7 +143,7 @@ public class Main {
 
     private static void exitSystem() {
         if (Config.getInstance().getInt("main", "dev_mode") == 1) {
-            System.out.println("Exitting the program... bye.");
+            logger.log("Exitting the program... bye.");
         }
         System.exit(1);
     }

@@ -19,22 +19,27 @@ import org.json.simple.parser.JSONParser;
 public class WebSocketServerFactory extends WebSocketServer {
 
     private final Config conf;
+    private final Logger logger;
 
     public WebSocketServerFactory(int port) {
         super(new InetSocketAddress(port));
         this.conf = Config.getInstance();
+        this.logger = Logger.getInstance();
     }
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        if (Config.getInstance().getInt("main", "dev_mode") == 1) {
-            System.err.println("websocket started...");
+        if (conf.getInt("main", "dev_mode") == 1) {
+            logger.log("websocket started...");
         }
         //Handle new connection here
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+
+        logger.log("websocket message received: " + message);
+
         JSONObject res = new JSONObject();
         String command = null;
         JSONObject jsonObj = null;
@@ -43,46 +48,44 @@ public class WebSocketServerFactory extends WebSocketServer {
             Object obj = parser.parse(message);
             jsonObj = (JSONObject) obj;
             command = (String) jsonObj.get("command");
-        } catch (Exception ex) {
-            if (conf.getInt("main", "dev_mode") == 1) {
-                System.err.println("Json parse error: : " + ex.getMessage());
-            }
-        }
-        if (command == null || command.isEmpty()) {
-            return;
-        }
-        switch (command) {
-            case Constants.CAMERA_START_STREAMING:
-                Integer width = (Integer) jsonObj.get("width");
-                Integer height = (Integer) jsonObj.get("height");
-                Integer fps = (Integer) jsonObj.get("fps");
-                res.put("message", CameraControl.getInstance().startStreaming(width, height, fps));
-                break;
-            case Constants.CAMERA_STOP_STREAMING:
-                res.put("message", CameraControl.getInstance().stopStreaming());
-                break;
-        }
 
+            if (command == null || command.isEmpty()) {
+                return;
+            }
+            switch (command) {
+                case Constants.CAMERA_START_STREAMING:
+                    int width = (int) (long) jsonObj.get("width");
+                    int height = (int) (long) jsonObj.get("height");
+                    int fps = (int) (long) jsonObj.get("fps");
+                    res.put("message", CameraControl.getInstance().startStreaming(width, height, fps));
+                    break;
+                case Constants.CAMERA_STOP_STREAMING:
+                    res.put("message", CameraControl.getInstance().stopStreaming());
+                    break;
+            }
+        } catch (Exception ex) {
+
+            logger.log("Json parse error: : " + ex.getMessage());
+
+        }
         if (!res.isEmpty()) {
             conn.send(res.toJSONString());
-            if (Config.getInstance().getInt("main", "dev_mode") == 1) {
-                System.err.println("websocket response: " + res.toJSONString());
-            }
+            logger.log("websocket response: " + res.toJSONString());
+
         }
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        if (Config.getInstance().getInt("main", "dev_mode") == 1) {
-            System.err.println("websocket closed");
-        }
+
+        logger.log("websocket closed");
+
     }
 
     @Override
     public void onError(WebSocket conn, Exception exc) {
-        if (Config.getInstance().getInt("main", "dev_mode") == 1) {
-            System.err.println("websocket error: " + exc.getMessage());
-        }
+        logger.log("websocket error: " + exc.getMessage());
+
     }
 
 }
