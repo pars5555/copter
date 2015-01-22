@@ -136,6 +136,7 @@ public class CameraControl implements Runnable {
             if (pid != null && !pid.isEmpty()) {
                 Runtime.getRuntime().exec("kill " + pid);
                 Runtime.getRuntime().exec("pkill -f " + conf.getString("camera", "raspivid_process_command_name"));
+                Runtime.getRuntime().exec("pkill vlc");
                 return "camera raspivid stoped";
             } else {
                 return "seems there is no camera raspivid prcess to stop!";
@@ -165,13 +166,13 @@ public class CameraControl implements Runnable {
             String userName = br.readLine();
             String camStartComand = "";
 
-            if (currentAction.equals(conf.getString("camera", "raspivid_process_command_name"))) {
+            if (currentAction != null && currentAction.equals(conf.getString("camera", "raspivid_process_command_name"))) {
                 camStartComand = String.format(conf.getString("camera", "raspivid_command"), this.width, this.height, this.fps);
             } else {
                 camStartComand = String.format(conf.getString("camera", "raspistill_command"), this.width, this.height, this.fps);
             }
 
-            if (userName.equalsIgnoreCase("root")) {
+            if (userName!= null && userName.equalsIgnoreCase("root")) {
                 String runAsAnotherUser = conf.getString("main", "run_command_as_another_user");
                 String camera_running_user_name = conf.getString("camera", "user_name");
                 cameraStreamCommand = String.format(runAsAnotherUser, camStartComand, camera_running_user_name);

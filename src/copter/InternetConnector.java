@@ -27,11 +27,13 @@ public class InternetConnector implements Runnable {
         logger = Logger.getInstance();
     }
 
-    public String connectBySakis3g() {
-        if (this.checkConnectionToServer() || this.checkInternetConnection()) {
-            return "device is already connected to the internet.";
+    public boolean connectBySakis3g() {
+        if (this.checkInternetConnection()) {
+            logger.log("device is already connected to the internet.");
+            return true;
         }
         try {
+            this.silentDisconectFromSakis3g();
             String internetConnectProcessCommandName = Config.getInstance().getString("main", "internet_connect_process_command_name");
             Process p = Runtime.getRuntime().exec("pidof " + internetConnectProcessCommandName);
             InputStream inputStream = p.getInputStream();
@@ -39,20 +41,26 @@ public class InternetConnector implements Runnable {
             BufferedReader br = new BufferedReader(isr);
             String pid = br.readLine();
             if (pid == null || pid.isEmpty()) {
+                if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
+                    thread.interrupt();
+                }
                 thread = new Thread(this);
                 thread.start();
                 try {
-                    Thread.sleep(20000);
+                    Thread.sleep(15000);
                 } catch (InterruptedException ex) {
                     logger.log(ex.getMessage());
+                    return false;
                 }
-                return "connecting...";
+                logger.log("connecting...");
+                return true;
             } else {
-                return "connection is already lunched " + internetConnectProcessCommandName + " PID:" + pid;
+                logger.log("connection is already lunched " + internetConnectProcessCommandName + " PID:" + pid);
+                return false;
             }
         } catch (IOException ex) {
             logger.log(ex.getMessage());
-            return "connection error: " + ex.getMessage();
+            return false;
         }
     }
 
@@ -90,7 +98,7 @@ public class InternetConnector implements Runnable {
         }
     }
 
-    public String disconnectFromSakis3g() {
+    private String silentDisconectFromSakis3g() {
         try {
             String internetConnectProcessCommandName = Config.getInstance().getString("main", "internet_connect_process_command_name");
             Process p = Runtime.getRuntime().exec("pidof " + internetConnectProcessCommandName);
@@ -101,14 +109,25 @@ public class InternetConnector implements Runnable {
             if (pid != null && !pid.isEmpty()) {
                 String internetDisconnectCommand = Config.getInstance().getString("main", "internet_disconnect_command");
                 Runtime.getRuntime().exec(internetDisconnectCommand);
-                //Runtime.getRuntime().exec("kill " + pid);
-                return "disconnecting...";
+                Runtime.getRuntime().exec("kill " + pid);
+                return "ok";
             } else {
-                return "there is no connection prcess to stop!";
+                return "none";
             }
         } catch (IOException ex) {
             logger.log(ex.getMessage());
-            return "connection error: " + ex.getMessage();
+            return ex.getMessage();
+        }
+    }
+
+    public String disconnectFromSakis3g() {
+        String res = this.silentDisconectFromSakis3g();
+        if (res!= null && res.equals("ok")) {
+            return "disconnecting...";
+        } else if (res!= null && res.equals("none")) {
+            return "there is no connection prcess to stop!";
+        } else {
+            return "connection error: " + res;
         }
     }
 
