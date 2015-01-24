@@ -135,8 +135,8 @@ public class GpioControl {
      * @param milliseconds duration
      * @param state true->hight, false->low
      */
-    public void pulsePin(Integer pinNumber, Integer milliseconds, boolean state) {
-        this.getOutputPin(pinNumber).pulse(milliseconds, state);
+    public void pulsePin(Integer pinNumber, Integer milliseconds) {
+        this.getOutputPin(pinNumber).pulse(milliseconds);
     }
 
     public void doAction(JSONObject jsonParam) {
@@ -150,8 +150,7 @@ public class GpioControl {
             case "pulse":
                 pinNumber = (int) (long) jsonParam.get("pin_number");
                 int durationMilliseconds = (int) (long) jsonParam.get("duration_milliseconds");
-                pinState = (int) (long) jsonParam.get("pin_state");
-                this.pulsePin(pinNumber, durationMilliseconds, pinState != 0);
+                this.pulsePin(pinNumber, durationMilliseconds);
                 break;
             case "set_pin_state":
                 pinNumber = (int) (long) jsonParam.get("pin_number");
