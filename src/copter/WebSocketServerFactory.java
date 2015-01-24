@@ -71,6 +71,9 @@ public class WebSocketServerFactory extends WebSocketServer {
                 case Constants.CAMERA_STOP_RASPISTILL:
                     res.put("message", CameraControl.getInstance().stopRaspistill());
                     break;
+                case Constants.GPIO_COMMAND:
+                    GpioControl.getInstance().doAction(jsonObj);
+                    break;
             }
         } catch (Exception ex) {
 
