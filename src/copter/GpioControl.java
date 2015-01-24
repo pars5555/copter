@@ -10,7 +10,9 @@ import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.RaspiPin;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.json.simple.JSONObject;
 
 /**
@@ -22,40 +24,81 @@ public class GpioControl {
     private static GpioControl instance = null;
     private static Logger logger = null;
     private final GpioController gpio;
-    private List<GpioPinDigitalOutput> pins;
+    private final Map<Integer, GpioPinDigitalOutput> pins;
 
     private GpioControl() {
         logger = Logger.getInstance();
         gpio = GpioFactory.getInstance();
+        pins = new HashMap<>();
     }
 
-    public void init() {
-        this.initAllPinsAsOutput();
-    }
-
-    private void initAllPinsAsOutput() {
-        pins = new ArrayList<>();
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_05));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_06));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_07));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_08));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_09));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_10));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_11));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_12));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_13));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_14));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_15));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_16));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_18));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_19));
-        pins.add(gpio.provisionDigitalOutputPin(RaspiPin.GPIO_20));
+    private GpioPinDigitalOutput getOutputPin(Integer pinNumber) {
+        if (pins.containsKey(pinNumber)) {
+            return pins.get(pinNumber);
+        }
+        switch (pinNumber) {
+            case 0:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_00));
+                break;
+            case 1:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_01));
+                break;
+            case 2:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_02));
+                break;
+            case 3:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_03));
+                break;
+            case 4:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_04));
+                break;
+            case 5:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_05));
+                break;
+            case 6:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_06));
+                break;
+            case 7:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_07));
+                break;
+            case 8:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_08));
+                break;
+            case 9:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_09));
+                break;
+            case 10:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_10));
+                break;
+            case 11:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_11));
+                break;
+            case 12:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_12));
+                break;
+            case 13:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_13));
+                break;
+            case 14:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_14));
+                break;
+            case 15:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_15));
+                break;
+            case 16:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_16));
+                break;
+            case 17:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_17));
+                break;
+            case 18:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_18));
+                break;
+            case 19:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_19));
+                break;
+        }
+        return pins.get(pinNumber);
     }
 
     public static GpioControl getInstance() {
@@ -72,9 +115,9 @@ public class GpioControl {
      */
     public void setPinState(Integer pinNumber, boolean state) {
         if (state) {
-            pins.get(pinNumber).high();
+            this.getOutputPin(pinNumber).high();
         } else {
-            pins.get(pinNumber).low();
+            this.getOutputPin(pinNumber).low();
         }
     }
 
@@ -83,7 +126,7 @@ public class GpioControl {
      * @param pinNumber 0 based
      */
     public void togglePinState(Integer pinNumber) {
-        pins.get(pinNumber).toggle();
+        this.getOutputPin(pinNumber).toggle();
     }
 
     /**
@@ -93,7 +136,7 @@ public class GpioControl {
      * @param state true->hight, false->low
      */
     public void pulsePin(Integer pinNumber, Integer milliseconds, boolean state) {
-        pins.get(pinNumber).pulse(milliseconds, state);
+        this.getOutputPin(pinNumber).pulse(milliseconds, state);
     }
 
     public void doAction(JSONObject jsonParam) {
