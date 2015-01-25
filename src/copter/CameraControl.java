@@ -106,6 +106,7 @@ public class CameraControl implements Runnable {
             if (pid != null && !pid.isEmpty()) {
                 Runtime.getRuntime().exec("kill " + pid);
                 Runtime.getRuntime().exec("pkill -f " + conf.getString("camera", "raspivid_process_command_name"));
+                Runtime.getRuntime().exec("pkill vlc");
                 return "camera raspivid stoped";
             } else {
                 return "seems there is no camera raspivid prcess to stop!";
