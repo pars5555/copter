@@ -38,10 +38,7 @@ public class WebSocketServerFactory extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
 
-        logger.log("websocket message received: " + message);
-
         JSONObject res = new JSONObject();
-        String resString = "";
         String command = null;
         JSONObject jsonObj = null;
         try {
@@ -53,24 +50,33 @@ public class WebSocketServerFactory extends WebSocketServer {
             if (command == null || command.isEmpty()) {
                 return;
             }
-
+            if (!command.equals(Constants.PING_COMMAND)) {
+                logger.log("websocket message received: " + message);
+            }
             switch (command) {
                 case Constants.CAMERA_COMMAND:
-                    resString = CameraControl.getInstance().doAction(jsonObj);
+                    res.put("message", CameraControl.getInstance().doAction(jsonObj));
+                    break;
                 case Constants.GPIO_COMMAND:
-                    resString = GpioControl.getInstance().doAction(jsonObj);
+                    res.put("message", GpioControl.getInstance().doAction(jsonObj));
+                    break;
+                case Constants.PING_COMMAND:
+                    res.put("status", "ok");
+                    String ping_id = (String) jsonObj.get("ping_id");
+                    res.put("ping_id", ping_id);
                     break;
             }
 
         } catch (Exception ex) {
             String err = "Json parse error: " + ex.getMessage();
             logger.log(err);
-            resString = err;
+            res.put("message", err);
         }
-        if (!resString.isEmpty()) {
-            res.put("message", resString);
+        if (!res.isEmpty()) {
             conn.send(res.toJSONString());
-            logger.log("websocket response: " + res.toJSONString());
+            if (!command.equals(Constants.PING_COMMAND)) {
+                logger.log("websocket response: " + res.toJSONString());
+            }
         }
     }
 

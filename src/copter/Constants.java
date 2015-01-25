@@ -11,6 +11,7 @@ package copter;
  */
 abstract public class Constants {
 
+    public static final String PING_COMMAND = "ping";
     public static final String GPIO_COMMAND = "gpio";
     public static final String GPIO_PULSE_ACTION = "pulse";
     public static final String GPIO_SET_PIN_STATE_ACTION = "set_pin_state";
