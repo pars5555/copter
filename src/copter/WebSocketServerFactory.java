@@ -53,26 +53,10 @@ public class WebSocketServerFactory extends WebSocketServer {
                 return;
             }
             switch (command) {
-                case Constants.CAMERA_START_STREAMING:
-                    int width = (int) (long) jsonObj.get("width");
-                    int height = (int) (long) jsonObj.get("height");
-                    int fps = (int) (long) jsonObj.get("fps");
-                    res.put("message", CameraControl.getInstance().startStreaming(width, height, fps));
-                    break;
-                case Constants.CAMERA_START_RASPISTILL:
-                    int w = (int) (long) jsonObj.get("width");
-                    int h = (int) (long) jsonObj.get("height");
-                    int _fps = (int) (long) jsonObj.get("fps");
-                    res.put("message", CameraControl.getInstance().startRaspistill(w, h, _fps));
-                    break;
-                case Constants.CAMERA_STOP_STREAMING:
-                    res.put("message", CameraControl.getInstance().stopStreaming());
-                    break;
-                case Constants.CAMERA_STOP_RASPISTILL:
-                    res.put("message", CameraControl.getInstance().stopRaspistill());
-                    break;
+                case Constants.CAMERA_COMMAND:
+                    res.put("message", CameraControl.getInstance().doAction(jsonObj) );
                 case Constants.GPIO_COMMAND:
-                    GpioControl.getInstance().doAction(jsonObj);
+                    res.put("message", GpioControl.getInstance().doAction(jsonObj));
                     break;
             }
         } catch (Exception ex) {

@@ -100,7 +100,7 @@ public class GpioControl {
         }
         return pins.get(pinNumber);
     }
-
+   
     public static GpioControl getInstance() {
         if (instance == null) {
             instance = new GpioControl();
@@ -108,40 +108,32 @@ public class GpioControl {
         return instance;
     }
 
-    /**
-     *
-     * @param pinNumber 0 based
-     * @param state
-     */
-    public void setPinState(Integer pinNumber, boolean state) {
+   
+    public String setPinState(Integer pinNumber, boolean state) {
         if (state) {
-            this.getOutputPin(pinNumber).high();
+            pins.get(pinNumber).high();
+            return "Set GPIO pin #"+pinNumber.toString()+" state to HIGH";
         } else {
-            this.getOutputPin(pinNumber).low();
+            pins.get(pinNumber).low();
+            return "Set GPIO pin #"+pinNumber.toString()+" state to LOW";
         }
     }
 
-    /**
-     *
-     * @param pinNumber 0 based
-     */
-    public void togglePinState(Integer pinNumber) {
-        this.getOutputPin(pinNumber).toggle();
+    
+    public String togglePinState(Integer pinNumber) {
+        pins.get(pinNumber).toggle();
+        return "Toggle GPIO pin #"+pinNumber.toString()+" state";
     }
 
-    /**
-     *
-     * @param pinNumber 0 based
-     * @param milliseconds duration
-     * @param state true->hight, false->low
-     */
-    public void pulsePin(Integer pinNumber, Integer milliseconds) {
-        this.getOutputPin(pinNumber).pulse(milliseconds);
+   
+    public String pulsePin(Integer pinNumber, Integer milliseconds) {
+        pins.get(pinNumber).pulse(milliseconds);
+        return "Pulse to GPIO pin #"+pinNumber.toString()+" duration: "+milliseconds.toString();
     }
 
-    public void doAction(JSONObject jsonParam) {
+    public String doAction(JSONObject jsonParam) {
         if (!jsonParam.containsKey("action")) {
-            return;
+            return "Missing 'action' param!";
         }
         String action = (String) jsonParam.get("action");
         int pinNumber;
@@ -150,18 +142,16 @@ public class GpioControl {
             case "pulse":
                 pinNumber = (int) (long) jsonParam.get("pin_number");
                 int durationMilliseconds = (int) (long) jsonParam.get("duration_milliseconds");
-                this.pulsePin(pinNumber, durationMilliseconds);
-                break;
+                return this.pulsePin(pinNumber, durationMilliseconds);
             case "set_pin_state":
                 pinNumber = (int) (long) jsonParam.get("pin_number");
                 pinState = (int) (long) jsonParam.get("pin_state");
-                this.setPinState(pinNumber, pinState != 0);
-                break;
+                return this.setPinState(pinNumber, pinState != 0);
             case "toggle_pin_state":
                 pinNumber = (int) (long) jsonParam.get("pin_number");
-                this.togglePinState(pinNumber);
-                break;
+                return this.togglePinState(pinNumber);
         }
+        return "Unknown 'action' param: " + action;
     }
 
 }

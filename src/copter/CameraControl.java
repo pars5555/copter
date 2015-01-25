@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import org.json.simple.JSONObject;
 
 /**
  *
@@ -24,73 +25,14 @@ public class CameraControl implements Runnable {
     private int fps;
     private final Config conf;
     private final Logger logger;
-    private String currentAction = "";
+    private String cameraCommand = "";
 
     private CameraControl() {
         this.conf = Config.getInstance();
         this.logger = Logger.getInstance();
     }
 
-    public String startRaspistill(int width, int height, int fps) {
-        try {
-            Process p = Runtime.getRuntime().exec("pidof " + conf.getString("camera", "raspistill_process_command_name"));
-            InputStream inputStream = p.getInputStream();
-            InputStreamReader isr = new InputStreamReader(inputStream);
-            BufferedReader br = new BufferedReader(isr);
-            String pid = br.readLine();
-            if (pid == null || pid.isEmpty()) {
-                this.width = width;
-                this.height = height;
-                this.fps = fps;
-                if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
-                    thread.interrupt();
-                }
-                currentAction = conf.getString("camera", "raspistill_process_command_name");
-                Runtime.getRuntime().exec(conf.getString("nginx", "nginx_start"));
-                thread = new Thread(this);
-                thread.start();
-                return "camera raspistill started";
-            } else {
-                return "camera raspistill already stared Process ID: " + pid;
-            }
-        } catch (IOException ex) {
-            logger.log(ex.getMessage());
-            return "camera raspistill start error: " + ex.getMessage();
-
-        }
-
-    }
-
-    public String stopRaspistill() {
-        try {
-            if (process != null) {
-                process.destroy();
-            }
-            if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
-                thread.interrupt();
-            }
-
-            Process p = Runtime.getRuntime().exec("pidof " + conf.getString("camera", "raspistill_process_command_name"));
-            InputStream inputStream = p.getInputStream();
-            InputStreamReader isr = new InputStreamReader(inputStream);
-            BufferedReader br = new BufferedReader(isr);
-            String pid = br.readLine();
-            if (pid != null && !pid.isEmpty()) {
-                Runtime.getRuntime().exec("kill " + pid);
-                Runtime.getRuntime().exec("pkill -f " + conf.getString("camera", "raspistill_process_command_name"));
-                Runtime.getRuntime().exec(conf.getString("nginx", "nginx_stop"));
-                Runtime.getRuntime().exec("pkill -f nginx");
-                return "camera raspistill stoped";
-            } else {
-                return "seems there is no camera raspistill prcess to stop!";
-            }
-        } catch (IOException ex) {
-            logger.log(ex.getMessage());
-            return "camera raspistill stop error: " + ex.getMessage();
-        }
-    }
-
-    public String startStreaming(int width, int height, int fps) {
+    public String startStreamingRtmp(int width, int height, int fps) {
         try {
             Process p = Runtime.getRuntime().exec("pidof " + conf.getString("camera", "raspivid_process_command_name"));
             InputStream inputStream = p.getInputStream();
@@ -104,7 +46,36 @@ public class CameraControl implements Runnable {
                 if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
                     thread.interrupt();
                 }
-                currentAction = conf.getString("camera", "raspivid_process_command_name");
+                cameraCommand = conf.getString("camera", "raspivid_rtmp_command");
+                thread = new Thread(this);
+                thread.start();
+                return "camera raspivid started";
+            } else {
+                return "camera raspivid already stared Process ID: " + pid;
+            }
+        } catch (IOException ex) {
+            logger.log(ex.getMessage());
+            return "camera raspivid start error: " + ex.getMessage();
+
+        }
+
+    }
+
+    public String startHttpStreaming(int width, int height, int fps) {
+        try {
+            Process p = Runtime.getRuntime().exec("pidof " + conf.getString("camera", "raspivid_process_command_name"));
+            InputStream inputStream = p.getInputStream();
+            InputStreamReader isr = new InputStreamReader(inputStream);
+            BufferedReader br = new BufferedReader(isr);
+            String pid = br.readLine();
+            if (pid == null || pid.isEmpty()) {
+                this.width = width;
+                this.height = height;
+                this.fps = fps;
+                if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
+                    thread.interrupt();
+                }
+                cameraCommand = conf.getString("camera", "raspivid_command");
                 thread = new Thread(this);
                 thread.start();
                 return "camera raspivid started";
@@ -127,7 +98,6 @@ public class CameraControl implements Runnable {
             if (thread != null && thread.isAlive() && !thread.isInterrupted()) {
                 thread.interrupt();
             }
-
             Process p = Runtime.getRuntime().exec("pidof " + conf.getString("camera", "raspivid_process_command_name"));
             InputStream inputStream = p.getInputStream();
             InputStreamReader isr = new InputStreamReader(inputStream);
@@ -136,7 +106,6 @@ public class CameraControl implements Runnable {
             if (pid != null && !pid.isEmpty()) {
                 Runtime.getRuntime().exec("kill " + pid);
                 Runtime.getRuntime().exec("pkill -f " + conf.getString("camera", "raspivid_process_command_name"));
-                Runtime.getRuntime().exec("pkill vlc");
                 return "camera raspivid stoped";
             } else {
                 return "seems there is no camera raspivid prcess to stop!";
@@ -165,14 +134,9 @@ public class CameraControl implements Runnable {
             BufferedReader br = new BufferedReader(isr);
             String userName = br.readLine();
             String camStartComand = "";
+            camStartComand = String.format(cameraCommand, this.width, this.height, this.fps);
 
-            if (currentAction != null && currentAction.equals(conf.getString("camera", "raspivid_process_command_name"))) {
-                camStartComand = String.format(conf.getString("camera", "raspivid_command"), this.width, this.height, this.fps);
-            } else {
-                camStartComand = String.format(conf.getString("camera", "raspistill_command"), this.width, this.height, this.fps);
-            }
-
-            if (userName!= null && userName.equalsIgnoreCase("root")) {
+            if (userName.equalsIgnoreCase("root")) {
                 String runAsAnotherUser = conf.getString("main", "run_command_as_another_user");
                 String camera_running_user_name = conf.getString("camera", "user_name");
                 cameraStreamCommand = String.format(runAsAnotherUser, camStartComand, camera_running_user_name);
@@ -197,5 +161,27 @@ public class CameraControl implements Runnable {
         } catch (Exception ex) {
             logger.log(ex.getMessage());
         }
+    }
+
+    public String doAction(JSONObject jsonParam) {
+        if (!jsonParam.containsKey("action")) {
+            return "Missing 'action' param!";
+        }
+        String action = (String) jsonParam.get("action");
+        switch (action) {
+            case Constants.CAMERA_START_HTTP_STREMING_ACTION:
+                int width = (int) (long) jsonParam.get("width");
+                int height = (int) (long) jsonParam.get("height");
+                int fps = (int) (long) jsonParam.get("fps");
+                return CameraControl.getInstance().startHttpStreaming(width, height, fps);
+            case Constants.CAMERA_START_RTMP_STREAMING_ACTION:
+                int w = (int) (long) jsonParam.get("width");
+                int h = (int) (long) jsonParam.get("height");
+                int _fps = (int) (long) jsonParam.get("fps");
+                return CameraControl.getInstance().startStreamingRtmp(w, h, _fps);
+            case Constants.CAMERA_STOP_STREAMING_COMMAND:
+                return CameraControl.getInstance().stopStreaming();
+        }
+        return "Unknown 'action' param: " + action;
     }
 }

@@ -11,8 +11,8 @@ package copter;
  */
 abstract public  class Constants {
     public static final String  GPIO_COMMAND = "gpio";
-    public static final String  CAMERA_START_STREAMING = "camera start streaming";
-    public static final String  CAMERA_START_RASPISTILL = "camera start raspistill";
-    public static final String CAMERA_STOP_STREAMING = "camera stop streaming";
-    public static final String CAMERA_STOP_RASPISTILL = "camera stop raspistill";
+    public static final String  CAMERA_COMMAND = "camera";
+    public static final String  CAMERA_START_HTTP_STREMING_ACTION = "http_start_streaming";
+    public static final String CAMERA_START_RTMP_STREAMING_ACTION = "rtmp_start_streaming";
+    public static final String CAMERA_STOP_STREAMING_COMMAND = "stop_streaming";
 }
