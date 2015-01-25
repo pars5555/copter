@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package copter;
+/*package copter;
 
 import java.io.*;
 import javax.bluetooth.*;
@@ -68,3 +68,4 @@ public class BlutoothServer implements Runnable {
     }
 
 }
+*/

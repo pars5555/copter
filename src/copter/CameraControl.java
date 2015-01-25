@@ -173,14 +173,14 @@ public class CameraControl implements Runnable {
                 int width = (int) (long) jsonParam.get("width");
                 int height = (int) (long) jsonParam.get("height");
                 int fps = (int) (long) jsonParam.get("fps");
-                return CameraControl.getInstance().startHttpStreaming(width, height, fps);
+                return this.startHttpStreaming(width, height, fps);
             case Constants.CAMERA_START_RTMP_STREAMING_ACTION:
                 int w = (int) (long) jsonParam.get("width");
                 int h = (int) (long) jsonParam.get("height");
                 int _fps = (int) (long) jsonParam.get("fps");
-                return CameraControl.getInstance().startStreamingRtmp(w, h, _fps);
+                return this.startStreamingRtmp(w, h, _fps);
             case Constants.CAMERA_STOP_STREAMING_COMMAND:
-                return CameraControl.getInstance().stopStreaming();
+                return this.stopStreaming();
         }
         return "Unknown 'action' param: " + action;
     }

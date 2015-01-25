@@ -41,6 +41,7 @@ public class WebSocketServerFactory extends WebSocketServer {
         logger.log("websocket message received: " + message);
 
         JSONObject res = new JSONObject();
+        String resString = "";
         String command = null;
         JSONObject jsonObj = null;
         try {
@@ -52,22 +53,24 @@ public class WebSocketServerFactory extends WebSocketServer {
             if (command == null || command.isEmpty()) {
                 return;
             }
+
             switch (command) {
                 case Constants.CAMERA_COMMAND:
-                    res.put("message", CameraControl.getInstance().doAction(jsonObj) );
+                    resString = CameraControl.getInstance().doAction(jsonObj);
                 case Constants.GPIO_COMMAND:
-                    res.put("message", GpioControl.getInstance().doAction(jsonObj));
+                    resString = GpioControl.getInstance().doAction(jsonObj);
                     break;
             }
+
         } catch (Exception ex) {
-
-            logger.log("Json parse error: : " + ex.getMessage());
-
+            String err = "Json parse error: " + ex.getMessage();
+            logger.log(err);
+            resString = err;
         }
-        if (!res.isEmpty()) {
+        if (!resString.isEmpty()) {
+            res.put("message", resString);
             conn.send(res.toJSONString());
             logger.log("websocket response: " + res.toJSONString());
-
         }
     }
 

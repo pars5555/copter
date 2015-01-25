@@ -9,9 +9,7 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import com.pi4j.io.gpio.GpioPinDigitalOutput;
 import com.pi4j.io.gpio.RaspiPin;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.json.simple.JSONObject;
 
@@ -100,7 +98,7 @@ public class GpioControl {
         }
         return pins.get(pinNumber);
     }
-   
+
     public static GpioControl getInstance() {
         if (instance == null) {
             instance = new GpioControl();
@@ -108,27 +106,24 @@ public class GpioControl {
         return instance;
     }
 
-   
     public String setPinState(Integer pinNumber, boolean state) {
         if (state) {
-            pins.get(pinNumber).high();
-            return "Set GPIO pin #"+pinNumber.toString()+" state to HIGH";
+            getOutputPin(pinNumber).high();
+            return "Set GPIO pin #" + pinNumber.toString() + " state to HIGH";
         } else {
-            pins.get(pinNumber).low();
-            return "Set GPIO pin #"+pinNumber.toString()+" state to LOW";
+            getOutputPin(pinNumber).low();
+            return "Set GPIO pin #" + pinNumber.toString() + " state to LOW";
         }
     }
 
-    
     public String togglePinState(Integer pinNumber) {
-        pins.get(pinNumber).toggle();
-        return "Toggle GPIO pin #"+pinNumber.toString()+" state";
+        getOutputPin(pinNumber).toggle();
+        return "Toggle GPIO pin #" + pinNumber.toString() + " state";
     }
 
-   
     public String pulsePin(Integer pinNumber, Integer milliseconds) {
-        pins.get(pinNumber).pulse(milliseconds);
-        return "Pulse to GPIO pin #"+pinNumber.toString()+" duration: "+milliseconds.toString();
+        getOutputPin(pinNumber).pulse(milliseconds);
+        return "Pulse to GPIO pin #" + pinNumber.toString() + " duration: " + milliseconds.toString();
     }
 
     public String doAction(JSONObject jsonParam) {
@@ -139,15 +134,15 @@ public class GpioControl {
         int pinNumber;
         int pinState;
         switch (action) {
-            case "pulse":
+            case Constants.GPIO_PULSE_ACTION:
                 pinNumber = (int) (long) jsonParam.get("pin_number");
                 int durationMilliseconds = (int) (long) jsonParam.get("duration_milliseconds");
                 return this.pulsePin(pinNumber, durationMilliseconds);
-            case "set_pin_state":
+            case Constants.GPIO_SET_PIN_STATE_ACTION:
                 pinNumber = (int) (long) jsonParam.get("pin_number");
                 pinState = (int) (long) jsonParam.get("pin_state");
                 return this.setPinState(pinNumber, pinState != 0);
-            case "toggle_pin_state":
+            case Constants.GPIO_TOGGLE_PIN_STATE_ACTION:
                 pinNumber = (int) (long) jsonParam.get("pin_number");
                 return this.togglePinState(pinNumber);
         }
