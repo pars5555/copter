@@ -17,6 +17,7 @@ abstract public class Constants {
     public static final String GPIO_SET_PIN_STATE_ACTION = "set_pin_state";
     public static final String GPIO_TOGGLE_PIN_STATE_ACTION = "toggle_pin_state";
     public static final String CAMERA_COMMAND = "camera";
+    public static final String REBOOT_COMMAND = "reboot";
     public static final String MPU_COMMAND = "mpu";
     public static final String CAMERA_START_HTTP_STREMING_ACTION = "http_start_streaming";
     public static final String CAMERA_START_RTMP_STREAMING_ACTION = "rtmp_start_streaming";

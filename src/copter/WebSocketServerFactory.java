@@ -56,6 +56,9 @@ public class WebSocketServerFactory extends WebSocketServer implements Runnable 
                 logger.log("websocket message received: " + message);
             }
             switch (command) {
+                case Constants.REBOOT_COMMAND:
+                    res.put("message", LinuxCommandsUtil.getInstance().rebootSystem());
+                    break;
                 case Constants.CAMERA_COMMAND:
                     res.put("message", CameraControl.getInstance().doAction(jsonObj));
                     break;
@@ -69,6 +72,9 @@ public class WebSocketServerFactory extends WebSocketServer implements Runnable 
                     res.put("status", "ok");
                     String ping_id = (String) jsonObj.get("ping_id");
                     res.put("ping_id", ping_id);
+                    break;
+                default:
+                    res.put("message", "Unknown command '"+command+"'.");
                     break;
             }
 
