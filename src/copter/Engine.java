@@ -74,19 +74,19 @@ public class Engine {
         }
         String action = (String) jsonParam.get("action");
         switch (action) {
-            case Constants.SET_PITCH:
+            case Constants.SET_PITCH_ACTION:
                 int p = (int) (long) jsonParam.get("value");
                 this.setPitch(p);
                 return "Pitch set to " + p;
-            case Constants.SET_ROLL:
+            case Constants.SET_ROLL_ACTION:
                 int r = (int) (long) jsonParam.get("value");
                 this.setPitch(r);
                 return "Roll set to " + r;
-            case Constants.SET_THROTTLE:
+            case Constants.SET_THROTTLE_ACTION:
                 int th = (int) (long) jsonParam.get("value");
                 this.setPitch(th);
                 return "Throttle set to " + th;
-            case Constants.SET_YAW:
+            case Constants.SET_YAW_ACTION:
                 int y = (int) (long) jsonParam.get("value");
                 this.setPitch(y);
                 return "Yaw set to " + y;
