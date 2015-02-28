@@ -30,5 +30,6 @@ abstract public class Constants {
     public static final String SET_YAW_ACTION = "set_yaw";
     public static final String SET_ROLL_ACTION = "set_roll";
     public static final String SET_PITCH_ACTION = "set_pitch";
+    public static final String START_ENGINE_ACTION = "start_engine";
     public static final String CAMERA_STOP_STREAMING_COMMAND = "stop_streaming";
 }

@@ -90,6 +90,9 @@ public class Engine {
                 int y = (int) (long) jsonParam.get("value");
                 this.setPitch(y);
                 return "Yaw set to " + y;
+            case Constants.START_ENGINE_ACTION:
+                this.StartEngine();
+                return "Engine started";
         }
         return "Unknown 'action' param: " + action;
     }
