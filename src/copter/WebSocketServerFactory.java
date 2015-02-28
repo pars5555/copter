@@ -20,13 +20,11 @@ public class WebSocketServerFactory extends WebSocketServer implements Runnable 
 
     private final Config conf;
     private final Logger logger;
-    private final MPU9150 mpu9150;
 
     public WebSocketServerFactory(int port) {
         super(new InetSocketAddress(port));
         this.conf = Config.getInstance();
         this.logger = Logger.getInstance();
-        this.mpu9150 = MPU9150.getInstance();
     }
 
     @Override
@@ -63,7 +61,10 @@ public class WebSocketServerFactory extends WebSocketServer implements Runnable 
                     res.put("message", CameraControl.getInstance().doAction(jsonObj));
                     break;
                 case Constants.MPU_COMMAND:
-                    res.put("message", mpu9150.doAction(jsonObj, conn));
+                    res.put("message", MPU9150.getInstance().doAction(jsonObj, conn));
+                    break;
+                case Constants.ENGINE_COMMAND:
+                    Engine.getInstance().doAction(jsonObj, conn);
                     break;
                 case Constants.GPIO_COMMAND:
                     res.put("message", GpioControl.getInstance().doAction(jsonObj));

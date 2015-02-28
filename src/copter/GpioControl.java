@@ -95,6 +95,9 @@ public class GpioControl {
             case 19:
                 pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_19));
                 break;
+            case 20:
+                pins.put(pinNumber, gpio.provisionDigitalOutputPin(RaspiPin.GPIO_20));
+                break;
         }
         return pins.get(pinNumber);
     }
