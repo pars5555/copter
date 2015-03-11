@@ -19,7 +19,6 @@ public class Engine {
     private int yaw;
     private int pitch;
     private int roll;
-    private WebSocket conn;
 
     private Engine() {
 
@@ -68,7 +67,6 @@ public class Engine {
     }
 
     public String doAction(JSONObject jsonParam, WebSocket conn) {
-        this.conn = conn;
         if (!jsonParam.containsKey("action")) {
             return "Missing 'action' param!";
         }

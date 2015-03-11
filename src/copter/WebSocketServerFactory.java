@@ -60,6 +60,12 @@ public class WebSocketServerFactory extends WebSocketServer implements Runnable 
                 case Constants.CAMERA_COMMAND:
                     res.put("message", CameraControl.getInstance().doAction(jsonObj));
                     break;
+                case Constants.GPS_COMMAND:
+                    res.put("message", GpsdConnector.getInstance().doAction(jsonObj, conn));
+                    break;
+                case Constants.HCSR04_COMMAND:
+                    res.put("message", HCSR04.getInstance().doAction(jsonObj, conn));
+                    break;
                 case Constants.MPU_COMMAND:
                     res.put("message", MPU9150.getInstance().doAction(jsonObj, conn));
                     break;
@@ -75,7 +81,7 @@ public class WebSocketServerFactory extends WebSocketServer implements Runnable 
                     res.put("ping_id", ping_id);
                     break;
                 default:
-                    res.put("message", "Unknown command '"+command+"'.");
+                    res.put("message", "Unknown command '" + command + "'.");
                     break;
             }
 

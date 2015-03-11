@@ -32,4 +32,10 @@ abstract public class Constants {
     public static final String SET_PITCH_ACTION = "set_pitch";
     public static final String START_ENGINE_ACTION = "start_engine";
     public static final String CAMERA_STOP_STREAMING_COMMAND = "stop_streaming";
+    public static final String GPS_COMMAND = "gps";
+    public static final String START_STREAM_GPS_DATA = "start_gps_streaming";
+    public static final String STOP_STREAM_GPS_DATA = "stop_gps_streaming";
+    public static final String HCSR04_COMMAND = "hcsr04";
+    public static final String START_STREAM_DISTANCE_DATA = "start_distance_streaming";
+    public static final String STOP_STREAM_DISTANCE_DATA = "stop_distance_streaming";
 }

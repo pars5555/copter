@@ -25,6 +25,7 @@ public final class MPU9150 implements Runnable {
     private boolean sendAccelData;
     private boolean sendGyroData;
     private Thread thread = null;
+    private WebSocket conn;
 
     public static MPU9150 getInstance() {
         if (instance == null) {
@@ -32,7 +33,6 @@ public final class MPU9150 implements Runnable {
         }
         return instance;
     }
-    private WebSocket conn;
 
     private MPU9150() {
         sendAccelData = false;
@@ -157,7 +157,7 @@ public final class MPU9150 implements Runnable {
     @Override
     public void run() {
         JSONObject res = new JSONObject();
-        while (true) {            
+        while (true) {
             try {
                 if (sendAccelData || sendGyroData) {
                     res.clear();
@@ -180,7 +180,7 @@ public final class MPU9150 implements Runnable {
                 }
                 Thread.sleep(50);
 
-            } catch (InterruptedException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(MPU9150.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

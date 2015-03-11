@@ -44,7 +44,7 @@ public class Config implements LastError {
      */
     private String getJarDir() {
         File f = new File(System.getProperty("java.class.path"));
-        File dir = f.getAbsoluteFile().getParentFile();
+        File dir = f.getAbsoluteFile().getParentFile();        
         return dir.toString();
     }
 

@@ -50,6 +50,7 @@ public class ServerConnection implements Runnable {
             if (this.checkServerConnection()) {
                 String serverResponse = obtainIpAddressAndSendCopterInfoToServer();
                 if (serverResponse != null && serverResponse.equals("ok")) {
+                    GpsDataPoster.getInstance().init();
                     int port = Config.getInstance().getInt("main", "control_port");
                     WebSocketServerFactory wf = new WebSocketServerFactory(port);
                     wf.start();
@@ -118,6 +119,9 @@ public class ServerConnection implements Runnable {
      * this function make a post request to server and send the copter geo info
      */
     public String sendCopterGeoInfoToServer(CopterGpsData gpsData) {
+        if (gpsData == null) {
+            return "Empty gps data!";
+        }
         String copter_unique_id = Config.getInstance().getString("copter", "unique_id");
         JSONObject obj = new JSONObject();
         obj.putAll(gpsData.toMap());
@@ -158,9 +162,9 @@ public class ServerConnection implements Runnable {
             wr.close();
 
             int responseCode = con.getResponseCode();
-            logger.log("\nSending 'POST' request to URL : " + url);
-            logger.log("Post parameters : " + urlParameters);
-            logger.log("Response Code : " + responseCode);
+            //logger.log("\nSending 'POST' request to URL : " + url);
+            //logger.log("Post parameters : " + urlParameters);
+            //logger.log("Response Code : " + responseCode);
 
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));

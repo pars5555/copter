@@ -14,9 +14,7 @@ public class Main {
         logger = Logger.getInstance();
         logger.log("started");
         //BlutoothServer.getInstance().start();
-        /*connecting to the internet*/
         ServerConnection.getInstance().init();
-        //GpsDataPoster.getInstance().init();
     }
 
     public static Main getInstance() {

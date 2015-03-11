@@ -6,7 +6,11 @@
 package copter;
 
 import copter.dto.CopterGpsData;
+import de.taimos.gpsd4java.types.TPVObject;
 import java.util.logging.Level;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -23,6 +27,7 @@ public class GpsDataPoster implements Runnable {
     }
 
     void init() {
+        GpsdConnector.getInstance().init();
         if (thread != null) {
             thread.interrupt();
         }
@@ -38,19 +43,38 @@ public class GpsDataPoster implements Runnable {
     }
 
     public CopterGpsData getCopterGpsData() {
-        return new CopterGpsData(1, 2, 3, 4, 5);
+        TPVObject tpvObject = GpsdConnector.getInstance().getTpvObject();
+        if (tpvObject != null) {
+            return new CopterGpsData(tpvObject.getLongitude(), tpvObject.getLatitude(), tpvObject.getAltitude(), tpvObject.getSpeed(), tpvObject.getClimbRate());
+        }
+        return null;
     }
 
     @Override
     public void run() {
         while (true) {
-            if (InternetConnector.getInstance().checkConnectionToServer()) {
-                CopterGpsData copterGpsData = getCopterGpsData();
-                logger.log(ServerConnection.getInstance().sendCopterGeoInfoToServer(copterGpsData));
-            }
             try {
-                Thread.sleep(Long.parseLong(Config.getInstance().getString("gps", "date_send_to_server_interval_seconds")));
-            } catch (InterruptedException ex) {
+                if (InternetConnector.getInstance().checkConnectionToServer()) {
+                    if (GpsdConnector.getInstance().isConnected()) {
+                        CopterGpsData copterGpsData = getCopterGpsData();
+                        if (copterGpsData != null) {
+                            String jsonResponse = ServerConnection.getInstance().sendCopterGeoInfoToServer(copterGpsData);
+                            JSONParser parser = new JSONParser();
+                            Object obj = parser.parse(jsonResponse);
+                            JSONObject jsonObj = (JSONObject) obj;
+                            String status = (String) jsonObj.get("status");
+                            if (status == null || !status.equals("ok")) {
+                                logger.log("Gps data sending server response is not OK! response: "+jsonResponse);
+                            }
+                        } else {
+                            logger.log("Gps data in null! data is not sent to server.");
+                        }
+                    } else {
+                        logger.log("Gps is off! data is not sent to server.");
+                    }
+                }
+                Thread.sleep(Config.getInstance().getInt("gps", "date_send_to_server_interval_seconds") * 1000);
+            } catch (Exception ex) {
                 logger.log(ex.getMessage());
             }
         }

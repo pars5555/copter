@@ -68,11 +68,11 @@ public class Logger {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone(conf.getString("main", "timezone")));
         String d = sdf.format(new GregorianCalendar().getTime());
-        System.out.println(d + ": " + stackTraceElements[2].getClassName() + ": " + message);
+        System.out.println(d + ": " + stackTraceElements[2].getClassName() + "( line #" + stackTraceElements[2].getLineNumber() + ") : " + message);
         PrintWriter out = null;
         try {
             out = new PrintWriter(new BufferedWriter(new FileWriter(logFile, true)));
-            out.println(d + ": " + stackTraceElements[2].getClassName() + ": " + message);
+            out.println(d + ": " + stackTraceElements[2].getClassName() + "( line #" + stackTraceElements[2].getLineNumber() + ") : " + message);
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(Logger.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
